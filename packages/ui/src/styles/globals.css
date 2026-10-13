@@ -1,0 +1,92 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import '@fontsource-variable/raleway';
+
+@source '../components';
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+:root,
+[data-theme='light'] {
+	--background: #faf8f5;
+	--surface: #f1ede6;
+	--line: #ded8ce;
+	--muted: #6b6459;
+	--foreground: #1a150f;
+	--accent: #7d5a34;
+	--on-accent: #faf8f5;
+	--danger: #b23a2a;
+	--stage: #e7e1d7;
+	--scrim: rgb(0 0 0 / 0.35);
+	color-scheme: light;
+}
+
+[data-theme='dark'] {
+	--background: #0a0a0c;
+	--surface: #101013;
+	--line: #26262b;
+	--muted: #85808a;
+	--foreground: #f2eeec;
+	--accent: #e4483f;
+	--on-accent: #ffffff;
+	--danger: #e4483f;
+	--stage: #18181c;
+	--scrim: rgb(0 0 0 / 0.55);
+	color-scheme: dark;
+}
+
+@theme inline {
+	--color-background: var(--background);
+	--color-surface: var(--surface);
+	--color-line: var(--line);
+	--color-muted: var(--muted);
+	--color-foreground: var(--foreground);
+	--color-accent: var(--accent);
+	--color-on-accent: var(--on-accent);
+	--color-danger: var(--danger);
+	--color-stage: var(--stage);
+	--color-scrim: var(--scrim);
+	--font-sans: 'Raleway Variable', system-ui, sans-serif;
+	--font-mono: ui-monospace, monospace;
+}
+
+@layer base {
+	*,
+	::before,
+	::after {
+		border-color: var(--color-line);
+	}
+
+	html,
+	body,
+	#root {
+		height: 100%;
+	}
+
+	body {
+		margin: 0;
+		background: var(--color-background);
+		color: var(--color-foreground);
+		font-family: var(--font-sans);
+		font-size: 14px;
+		-webkit-font-smoothing: antialiased;
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	button:not(:disabled),
+	[role='button']:not(:disabled) {
+		cursor: pointer;
+	}
+}
+
+@utility tabular {
+	font-variant-numeric: tabular-nums;
+}
+
+@utility safe-top {
+	padding-top: max(env(safe-area-inset-top), 0px);
+}
+
+@utility safe-bottom {
+	padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}

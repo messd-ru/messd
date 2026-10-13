@@ -1,0 +1,25 @@
+{
+	"$schema": "https://turborepo.dev/schema.json",
+	"ui": "stream",
+	"agentGuidance": false,
+	"globalPassThroughEnv": ["PLAYWRIGHT_*", "CI"],
+	"tasks": {
+		"build": {
+			"dependsOn": ["^build"],
+			"outputs": ["dist/**"]
+		},
+		"typecheck": {
+			"dependsOn": ["^typecheck"]
+		},
+		"lint": {
+			"dependsOn": ["^lint"]
+		},
+		"dev": {
+			"cache": false,
+			"persistent": true
+		},
+		"test": {
+			"cache": false
+		}
+	}
+}

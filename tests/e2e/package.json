@@ -1,0 +1,23 @@
+{
+	"name": "@messd/e2e",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"test": "playwright test",
+		"lint": "eslint .",
+		"typecheck": "tsc"
+	},
+	"devDependencies": {
+		"@messd/api": "workspace:*",
+		"@messd/contracts": "workspace:*",
+		"@messd/core": "workspace:*",
+		"@messd/eslint-config": "workspace:*",
+		"@messd/typescript-config": "workspace:*",
+		"@messd/web": "workspace:*",
+		"@playwright/test": "1.64.0",
+		"@types/node": "24.19.2",
+		"eslint": "10.12.0",
+		"typescript": "6.0.3"
+	}
+}

@@ -1,0 +1,4 @@
+{
+	"extends": "@messd/typescript-config/base.json",
+	"include": ["src", "eslint.config.js"]
+}

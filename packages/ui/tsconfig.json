@@ -1,0 +1,7 @@
+{
+	"extends": "@messd/typescript-config/react.json",
+	"compilerOptions": {
+		"types": []
+	},
+	"include": ["src", "eslint.config.js"]
+}

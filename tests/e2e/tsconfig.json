@@ -1,0 +1,7 @@
+{
+	"extends": "@messd/typescript-config/node.json",
+	"compilerOptions": {
+		"lib": ["es2024", "dom"]
+	},
+	"include": ["specs", "support", "playwright.config.ts", "eslint.config.js"]
+}

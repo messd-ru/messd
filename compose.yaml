@@ -1,0 +1,155 @@
+name: messd
+
+x-app: &app
+  env_file:
+    - path: .env
+      required: false
+  restart: unless-stopped
+
+services:
+  postgres:
+    image: postgres:18.6-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-messd}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-messd}
+      POSTGRES_DB: ${POSTGRES_DB:-messd}
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres:/var/lib/postgresql
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  turn:
+    image: coturn/coturn:4.18.0
+    command:
+      - --listening-port=3478
+      - --fingerprint
+      - --use-auth-secret
+      - --static-auth-secret=${TURN_SECRET:-change-me}
+      - --realm=${TURN_REALM:-messd.local}
+      - --min-port=49160
+      - --max-port=49200
+      - --no-tls
+      - --log-file=stdout
+    ports:
+      - 3478:3478/udp
+      - 3478:3478/tcp
+      - 49160-49200:49160-49200/udp
+    restart: unless-stopped
+
+  api:
+    <<: *app
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: dev
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-messd}:${POSTGRES_PASSWORD:-messd}@postgres:5432/${POSTGRES_DB:-messd}
+      API_PORT: 3000
+    ports:
+      - 3000:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: apps/api/src
+          target: /app/apps/api/src
+        - action: sync
+          path: packages
+          target: /app/packages
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: apps/api/package.json
+
+  core:
+    <<: *app
+    build:
+      context: .
+      dockerfile: apps/core/Dockerfile
+      target: dev
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-messd}:${POSTGRES_PASSWORD:-messd}@postgres:5432/${POSTGRES_DB:-messd}
+      CORE_PORT: 4000
+      MEDIASOUP_WORKERS: 2
+      RTC_PORT: 40000
+      RTC_ANNOUNCED_ADDRESS: ${RTC_ANNOUNCED_ADDRESS:-127.0.0.1}
+    ports:
+      - 4000:4000
+      - 40000-40001:40000-40001/udp
+      - 40000-40001:40000-40001/tcp
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_started
+    develop:
+      watch:
+        - action: sync
+          path: apps/core/src
+          target: /app/apps/core/src
+        - action: sync
+          path: packages
+          target: /app/packages
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: apps/core/package.json
+
+  web:
+    <<: *app
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: dev
+    environment:
+      API_PROXY_TARGET: http://api:3000
+      CORE_PROXY_TARGET: http://core:4000
+    ports:
+      - 5173:5173
+    depends_on:
+      - api
+      - core
+    develop:
+      watch:
+        - action: sync
+          path: apps/web/src
+          target: /app/apps/web/src
+        - action: sync
+          path: apps/web/public
+          target: /app/apps/web/public
+        - action: sync
+          path: packages
+          target: /app/packages
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: apps/web/package.json
+
+  e2e:
+    profiles:
+      - test
+    build:
+      context: .
+      dockerfile: tests/e2e/Dockerfile
+    environment:
+      CI: 'true'
+      DATABASE_URL: postgres://${POSTGRES_USER:-messd}:${POSTGRES_PASSWORD:-messd}@postgres:5432/${POSTGRES_DB:-messd}
+    ipc: host
+    init: true
+    volumes:
+      - ./tests/e2e/playwright-report:/app/tests/e2e/playwright-report
+      - ./tests/e2e/test-results:/app/tests/e2e/test-results
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres:

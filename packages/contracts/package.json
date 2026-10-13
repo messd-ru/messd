@@ -1,0 +1,22 @@
+{
+	"name": "@messd/contracts",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./*": "./src/*.ts"
+	},
+	"scripts": {
+		"lint": "eslint .",
+		"typecheck": "tsc"
+	},
+	"dependencies": {
+		"zod": "4.6.7"
+	},
+	"devDependencies": {
+		"@messd/eslint-config": "workspace:*",
+		"@messd/typescript-config": "workspace:*",
+		"eslint": "10.12.0",
+		"typescript": "6.0.3"
+	}
+}

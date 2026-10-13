@@ -1,0 +1,38 @@
+@import '@messd/ui/styles/globals.css';
+
+@source '../../';
+
+@keyframes reaction-float {
+	0% {
+		opacity: 0;
+		transform: translateY(0) scale(0.6);
+	}
+	12% {
+		opacity: 1;
+		transform: translateY(-24px) scale(1);
+	}
+	100% {
+		opacity: 0;
+		transform: translateY(-260px) scale(1.1);
+	}
+}
+
+@keyframes waiting-pulse {
+	0%,
+	100% {
+		opacity: 0.5;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.15;
+		transform: scale(1.06);
+	}
+}
+
+@utility animate-reaction {
+	animation: reaction-float 2.6s ease-out forwards;
+}
+
+@utility animate-waiting {
+	animation: waiting-pulse 2.4s ease-in-out infinite;
+}

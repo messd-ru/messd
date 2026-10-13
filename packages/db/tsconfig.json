@@ -1,0 +1,4 @@
+{
+	"extends": "@messd/typescript-config/node.json",
+	"include": ["src", "drizzle.config.ts", "eslint.config.js"]
+}
