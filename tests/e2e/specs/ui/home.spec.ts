@@ -14,6 +14,16 @@ test.describe('Главная', () => {
 		await expect(page.getByRole('heading', { name: 'Привет, Иван' })).toBeVisible()
 	})
 
+	test('запрещает автоматическое увеличение при фокусе на поле в iOS', async ({
+		page,
+	}) => {
+		await page.goto('/')
+		await expect(page.locator('meta[name="viewport"]')).toHaveAttribute(
+			'content',
+			/(^|,\s*)maximum-scale=1(\s*,|$)/,
+		)
+	})
+
 	test('приветствует по имени и показывает дату на десктопе', async ({
 		page,
 		isMobile,
