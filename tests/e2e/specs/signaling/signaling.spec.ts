@@ -81,6 +81,43 @@ test.describe('Сигнализация', () => {
 		expect(left.peerId).toBe(peer.id)
 	})
 
+	test('возвращает создателя в его роль после выхода без leave', async () => {
+		const creator = await connect('Хозяин')
+		const member = await connect('Гость')
+		const room = await createRoom(creator.session.token)
+		const base = { code: room.code, rtpCapabilities: {}, publicKey: 'k' }
+		const first = await creator.client.request('join', base)
+		expect((await member.client.request('join', base)).ok).toBe(true)
+		if (!first.ok) throw new Error('join failed')
+
+		creator.client.close()
+		await member.client.waitFor('peerUpdated', ({ peer }) => peer.reconnecting)
+
+		const returned = await SignalingTestClient.connect()
+		clients.push(returned)
+		await returned.request('hello', { token: creator.session.token })
+		const again = await returned.request('join', { ...base, publicKey: 'k-new' })
+		if (!again.ok) throw new Error('rejoin failed')
+		expect(again.data.peerId).toBe(first.data.peerId)
+		expect(again.data.peers.map((peer) => peer.name)).toEqual(['Гость'])
+
+		const { peer } = await member.client.waitFor(
+			'peerUpdated',
+			({ peer: item }) => item.publicKey === 'k-new',
+		)
+		expect(peer).toMatchObject({
+			id: first.data.peerId,
+			name: 'Хозяин',
+			role: 'creator',
+			reconnecting: false,
+		})
+		const peek = await member.client.request('peek', { code: room.code })
+		expect(peek.ok && peek.data.room.peers.map((item) => item.name).sort()).toEqual([
+			'Гость',
+			'Хозяин',
+		])
+	})
+
 	test('разрешает модерацию только создателю', async () => {
 		const creator = await connect('Создатель')
 		const member = await connect('Участник')
