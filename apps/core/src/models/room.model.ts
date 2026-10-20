@@ -53,6 +53,13 @@ export class Room {
 		for (const session of this.watchers) session.emit('roomChanged', { room })
 	}
 
+	findPeerByGuest(guestId: string) {
+		for (const peer of this.peers.values()) {
+			if (peer.guestId === guestId) return peer
+		}
+		return null
+	}
+
 	findProducer(producerId: string): types.Producer<ProducerAppData> | null {
 		for (const peer of this.peers.values()) {
 			const producer = peer.producers.get(producerId)

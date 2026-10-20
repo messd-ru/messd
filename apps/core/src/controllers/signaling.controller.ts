@@ -185,14 +185,18 @@ export function createSignalingController({
 
 		async join(session, data) {
 			const guest = requireGuest(session)
+
 			if (session.peer && session.room) removePeer(session.room, session.peer)
 			const room = await registry.open(data.code)
 			if (room.banned.has(guest.id)) throw errors.forbidden()
 
-			const existing = data.peerId ? room.peers.get(data.peerId) : undefined
-			const rejoining = existing?.guestId === guest.id
+			const requested = data.peerId ? room.peers.get(data.peerId) : undefined
+			const existing = requested?.guestId === guest.id ? requested : room.findPeerByGuest(guest.id)
+			const rejoining = Boolean(existing)
+
 			let peer: Peer
-			if (existing && rejoining) {
+
+			if (existing) {
 				peer = existing
 				closePeerMedia(room, peer)
 				if (peer.session && peer.session !== session) detach(peer.session)
